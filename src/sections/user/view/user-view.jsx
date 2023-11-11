@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import axios from 'axios';
+import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -9,8 +10,6 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
-import { users } from 'src/_mock/user';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -25,6 +24,8 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJlbWFpbCI6ImRvZUBnbWFpbC5jb20iLCJpYXQiOjE2OTk1NTc2NjZ9.vmyjbI_Hg-VFQqfVbmIAkOXBYUSVrNxMbivRSfHr3zU'
+  const [users, setUsers] = useState([])
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -44,7 +45,24 @@ export default function UserPage() {
       setOrderBy(id);
     }
   };
+  
+  useEffect(() => {
+    // Function to fetch users from API
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('https://nftapi-production-405a.up.railway.app/allusers', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUsers(response.data); // Update state with fetched data
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
+    fetchUsers(); // Call the function to fetch users
+  }, []);
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
       const newSelecteds = users.map((n) => n.name);
@@ -93,6 +111,8 @@ export default function UserPage() {
   });
 
   const notFound = !dataFiltered.length && !!filterName;
+  
+  console.log(users);
 
   return (
     <Container>
@@ -122,11 +142,11 @@ export default function UserPage() {
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
-                  { id: 'name', label: 'Name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
+                  { id: 'Username', label: 'Username' },
+                  { id: 'email', label: 'Email' },
+                  { id: 'balance', label: 'Balance' },
                   { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
+                  { id: 'Nfts', label: 'Nfts' },
                   { id: '' },
                 ]}
               />
@@ -136,12 +156,12 @@ export default function UserPage() {
                   .map((row) => (
                     <UserTableRow
                       key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      status={row.status}
-                      company={row.company}
+                      name={row.username}
+                      role={row.balance}
+                      status={row.NFTs.length}
+                      company={row.email}
                       avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
+                      isVerified='yes'
                       selected={selected.indexOf(row.name) !== -1}
                       handleClick={(event) => handleClick(event, row.name)}
                     />

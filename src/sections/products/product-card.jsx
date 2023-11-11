@@ -1,4 +1,5 @@
-import PropTypes from 'prop-types';
+import axios from 'axios';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -8,82 +9,86 @@ import Typography from '@mui/material/Typography';
 
 import { fCurrency } from 'src/utils/format-number';
 
-import Label from 'src/components/label';
-import { ColorPreview } from 'src/components/color-utils';
 
 // ----------------------------------------------------------------------
 
-export default function ShopProductCard({ product }) {
-  const renderStatus = (
-    <Label
-      variant="filled"
-      color={(product.status === 'sale' && 'error') || 'info'}
-      sx={{
-        zIndex: 9,
-        top: 16,
-        right: 16,
-        position: 'absolute',
-        textTransform: 'uppercase',
-      }}
-    >
-      {product.status}
-    </Label>
-  );
+export default function ShopProductCard() {
+  const [product, setProduct] = useState(null);
 
-  const renderImg = (
-    <Box
-      component="img"
-      alt={product.name}
-      src={product.cover}
-      sx={{
-        top: 0,
-        width: 1,
-        height: 1,
-        objectFit: 'cover',
-        position: 'absolute',
-      }}
-    />
-  );
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get('https://nftapi-production-405a.up.railway.app/nft');
+        setProduct(response.data); // Assuming the API returns the product directly
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        // Handle error (e.g., show error message)
+      }
+    };
 
-  const renderPrice = (
-    <Typography variant="subtitle1">
-      <Typography
-        component="span"
-        variant="body1"
-        sx={{
-          color: 'text.disabled',
-          textDecoration: 'line-through',
-        }}
-      >
-        {product.priceSale && fCurrency(product.priceSale)}
-      </Typography>
-      &nbsp;
-      {fCurrency(product.price)}
-    </Typography>
-  );
+    fetchProduct();
+  }, []);
+
+  if (!product) {
+    return <div>Loading...</div>; // Or any other loading state representation
+  }
+
+
+
+
+
+
+
 
   return (
-    <Card>
-      <Box sx={{ pt: '100%', position: 'relative' }}>
-        {product.status && renderStatus}
+    <>
+      {product.map(nft => (
+        <Card>
+          <Box sx={{ pt: '100%', position: 'relative' }}>
 
-        {renderImg}
-      </Box>
+            <Box
+              component="img"
+              alt={nft.name}
+              src={nft.image}
+              sx={{
+                top: 0,
+                width: 1,
+                height: 1,
+                objectFit: 'cover',
+                position: 'absolute',
+              }}
+            />
+          </Box>
 
-      <Stack spacing={2} sx={{ p: 3 }}>
-        <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
-          {product.name}
-        </Link>
+          <Stack spacing={2} sx={{ p: 3 }}>
+            <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
+              {nft.name}
+            </Link>
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={product.colors} />
-          {renderPrice}
-        </Stack>
-      </Stack>
-    </Card>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="subtitle1">
+                <Typography
+                  component="span"
+                  variant="body1"
+                  sx={{
+                    color: 'text.disabled',
+                    textDecoration: 'line-through',
+                  }}
+                >
+                  {product.priceSale && fCurrency(product.priceSale)}
+                </Typography>
+                &nbsp;
+                {(nft.price * 10000).toFixed(2)} ETH
+              </Typography>
+            </Stack>
+          </Stack>
+        </Card>
+      ))}
+
+    </>
   );
 }
 
-ShopProductCard.propTypes = {
-  product: PropTypes.object,
-};
+// ShopProductCard.propTypes = {
+//   product: PropTypes.object,
+// };

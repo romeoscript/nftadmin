@@ -1,17 +1,17 @@
 import { Helmet } from 'react-helmet-async';
 
-import { ProductsView } from 'src/sections/products/view';
+import { Fund as Funds } from 'src/sections/fundWallet';
 
 // ----------------------------------------------------------------------
 
-export default function ProductsPage() {
+export default function Fund() {
   return (
     <>
       <Helmet>
-        <title> NFts | Minimal UI </title>
+        <title> Login | Minimal UI </title>
       </Helmet>
 
-      <ProductsView />
+      <Funds />
     </>
   );
 }
